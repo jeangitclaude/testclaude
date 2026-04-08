@@ -56,7 +56,10 @@ WORKDIR /app
 
 # Symfony app
 COPY api/ ./
-RUN composer install --no-dev --optimize-autoloader --no-interaction \
+# Create a minimal .env so Symfony's dotenv loader doesn't crash during build
+# (real values are injected via env vars at runtime by the host)
+RUN printf 'APP_ENV=prod\nAPP_DEBUG=0\nAPP_SECRET=build\nDATABASE_URL="mysql://build:build@localhost:3306/build?serverVersion=8.0&charset=utf8mb4"\n' > .env
+RUN APP_ENV=prod APP_DEBUG=0 composer install --no-dev --optimize-autoloader --no-interaction \
  && APP_ENV=prod APP_DEBUG=0 php bin/console cache:clear --no-debug \
  && APP_ENV=prod APP_DEBUG=0 php bin/console cache:warmup --no-debug
 

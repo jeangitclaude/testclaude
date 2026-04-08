@@ -1,0 +1,17 @@
+.env
+.env.local
+.env.*.local
+
+# Symfony
+api/vendor/
+api/var/
+api/.env.local
+api/.env.local.php
+
+# Node
+front/node_modules/
+front/dist/
+
+# IDE
+.idea/
+.vscode/

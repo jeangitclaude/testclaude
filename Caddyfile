@@ -1,0 +1,22 @@
+{
+	frankenphp
+	auto_https off
+}
+
+:8080 {
+	root * /app/public
+
+	encode zstd gzip
+
+	# API requests -> Symfony
+	@api path /api/*
+	php_server @api
+
+	# Everything else -> built React SPA
+	@app not path /api/*
+	handle @app {
+		root * /app/public/app
+		try_files {path} /index.html
+		file_server
+	}
+}

@@ -1,0 +1,28 @@
+services:
+  api:
+    build:
+      context: .
+      target: dev-api
+    container_name: todolist-api
+    volumes:
+      - ./api:/app
+    ports:
+      - "8080:8080"
+    environment:
+      APP_ENV: dev
+      APP_DEBUG: "1"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  front:
+    build:
+      context: .
+      target: dev-front
+    container_name: todolist-front
+    volumes:
+      - ./front:/app
+      - /app/node_modules
+    ports:
+      - "5173:5173"
+    environment:
+      VITE_API_URL: http://localhost:8080

@@ -69,4 +69,5 @@ COPY Caddyfile /etc/caddy/Caddyfile
 ENV APP_ENV=prod APP_DEBUG=0 SERVER_NAME=":8080"
 EXPOSE 8080
 
-CMD ["frankenphp", "run", "--config", "/etc/caddy/Caddyfile"]
+CMD sh -c "php bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration && \
+           frankenphp run --config /etc/caddy/Caddyfile"

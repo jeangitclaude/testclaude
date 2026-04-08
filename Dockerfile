@@ -47,8 +47,9 @@ RUN npm run build
 # ======================
 FROM dunglas/frankenphp:1-php8.3-alpine AS prod
 
-RUN apk add --no-cache icu-dev oniguruma-dev libzip-dev \
- && install-php-extensions pdo_mysql intl opcache zip
+RUN apk add --no-cache icu-dev oniguruma-dev libzip-dev libcap \
+ && install-php-extensions pdo_mysql intl opcache zip \
+ && setcap -r /usr/local/bin/frankenphp || true
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 

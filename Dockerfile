@@ -3,7 +3,7 @@
 # ======================
 # Stage 1 : Dev API (FrankenPHP + Composer + extensions)
 # ======================
-FROM dunglas/frankenphp:1-php8.3-alpine AS dev-api
+FROM dunglas/frankenphp:1-php8.4-alpine AS dev-api
 
 RUN apk add --no-cache git icu-dev oniguruma-dev libzip-dev $PHPIZE_DEPS \
  && install-php-extensions pdo_mysql intl opcache zip
@@ -45,7 +45,7 @@ RUN npm run build
 # ======================
 # Stage 4 : Prod (single image)
 # ======================
-FROM dunglas/frankenphp:1-php8.3-alpine AS prod
+FROM dunglas/frankenphp:1-php8.4-alpine AS prod
 
 RUN apk add --no-cache icu-dev oniguruma-dev libzip-dev libcap \
  && install-php-extensions pdo_mysql intl opcache zip \
@@ -59,7 +59,7 @@ WORKDIR /app
 COPY api/ ./
 # Create a minimal .env so Symfony's dotenv loader doesn't crash during build
 # (real values are injected via env vars at runtime by the host)
-RUN printf 'APP_ENV=prod\nAPP_DEBUG=0\nAPP_SECRET=build\nDATABASE_URL="mysql://build:build@localhost:3306/build?serverVersion=8.0&charset=utf8mb4"\n' > .env
+RUN printf 'APP_ENV=prod\nAPP_DEBUG=0\nAPP_SECRET=build\nDATABASE_URL="pdo-mysql://build:build@localhost:3306/build?serverVersion=8.0&charset=utf8mb4"\n' > .env
 RUN APP_ENV=prod APP_DEBUG=0 composer install --no-dev --optimize-autoloader --no-interaction \
  && APP_ENV=prod APP_DEBUG=0 php bin/console cache:clear --no-debug \
  && APP_ENV=prod APP_DEBUG=0 php bin/console cache:warmup --no-debug

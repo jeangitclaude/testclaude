@@ -30,7 +30,7 @@ Manuellement en dev : `docker compose exec api php bin/console doctrine:migratio
 
 ## Déploiement
 
-- **Hébergeur app** : Back4app Containers (déploiement depuis repo GitHub, build la dernière stage = `prod`)
+- **Hébergeur app** : Render Free (déploiement depuis repo GitHub, build la dernière stage = `prod`)
 - **Hébergeur BDD** : Clever Cloud, add-on MySQL plan DEV (gratuit)
 - **Variables d'env requises en prod** : `APP_ENV=prod`, `APP_DEBUG=0`, `APP_SECRET`, `DATABASE_URL`, `SERVER_NAME=:8080`
 - Plan de déploiement détaillé : `C:\Users\jackm\.claude\plans\lucky-shimmying-llama.md`
@@ -38,3 +38,4 @@ Manuellement en dev : `docker compose exec api php bin/console doctrine:migratio
 ## Conventions
 - Le `Dockerfile` est multi-stage — ne **jamais** toucher aux stages `dev-api` / `dev-front` / `front-build` sans raison, ils sont utilisés par docker-compose.
 - Les modifs prod-only vont dans le stage `prod` uniquement.
+- **Optimistic updates obligatoires** : toute action utilisateur (create, update, delete, toggle…) doit mettre à jour l'UI immédiatement, envoyer l'appel API en parallèle, et rollback en cas d'erreur. Ne jamais attendre la réponse API pour mettre à jour l'affichage.

@@ -20,10 +20,60 @@ export function useTasks() {
 
   useEffect(() => { refresh() }, [refresh])
 
-  const create = async (data) => { await api.create(data); await refresh() }
-  const update = async (id, data) => { await api.update(id, data); await refresh() }
-  const toggle = async (id) => { await api.toggle(id); await refresh() }
-  const remove = async (id) => { await api.remove(id); await refresh() }
+  const create = async (data) => {
+    const tempId = crypto.randomUUID()
+    const tempTask = {
+      id: tempId,
+      title: data.title,
+      description: data.description || null,
+      completed: false,
+      priority: data.priority,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    }
+    const prev = tasks
+    setTasks([tempTask, ...prev])
+    try {
+      const created = await api.create(data)
+      setTasks((cur) => cur.map((t) => (t.id === tempId ? created : t)))
+    } catch (e) {
+      setTasks(prev)
+      setError(e.message)
+    }
+  }
+
+  const update = async (id, data) => {
+    const prev = tasks
+    setTasks(tasks.map((t) => (t.id === id ? { ...t, ...data } : t)))
+    try {
+      await api.update(id, data)
+    } catch (e) {
+      setTasks(prev)
+      setError(e.message)
+    }
+  }
+
+  const toggle = async (id) => {
+    const prev = tasks
+    setTasks(tasks.map((t) => (t.id === id ? { ...t, completed: !t.completed } : t)))
+    try {
+      await api.toggle(id)
+    } catch (e) {
+      setTasks(prev)
+      setError(e.message)
+    }
+  }
+
+  const remove = async (id) => {
+    const prev = tasks
+    setTasks(tasks.filter((t) => t.id !== id))
+    try {
+      await api.remove(id)
+    } catch (e) {
+      setTasks(prev)
+      setError(e.message)
+    }
+  }
 
   return { tasks, loading, error, create, update, toggle, remove, refresh }
 }

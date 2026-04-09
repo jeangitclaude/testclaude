@@ -16,7 +16,7 @@ ENV SERVER_NAME=":8080"
 EXPOSE 8080
 
 # At first run, install deps if vendor missing then start FrankenPHP
-CMD sh -c "if [ ! -d vendor ]; then composer install --no-interaction; fi && \
+CMD sh -c "if [ ! -f vendor/autoload.php ]; then composer install --no-interaction; fi && \
            php bin/console cache:clear || true && \
            frankenphp run --config /etc/caddy/Caddyfile"
 

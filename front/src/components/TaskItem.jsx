@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 const PRIORITY_LABEL = { 0: 'Basse', 1: 'Moyenne', 2: 'Haute' }
 const PRIORITY_COLOR = {
@@ -10,13 +10,30 @@ const PRIORITY_COLOR = {
 export default function TaskItem({ task, onToggle, onUpdate, onRemove }) {
   const [editing, setEditing] = useState(false)
   const [title, setTitle] = useState(task.title)
+  const [description, setDescription] = useState(task.description || '')
+  const [priority, setPriority] = useState(task.priority)
 
-  async function save() {
-    if (title.trim() && title !== task.title) {
-      await onUpdate(task.id, { title: title.trim(), description: task.description, priority: task.priority })
-    } else {
-      setTitle(task.title)
+  useEffect(() => { setTitle(task.title) }, [task.title])
+  useEffect(() => { setDescription(task.description || '') }, [task.description])
+  useEffect(() => { setPriority(task.priority) }, [task.priority])
+
+  function save() {
+    const trimmedTitle = title.trim()
+    const trimmedDesc = description.trim() || null
+    if (!trimmedTitle) {
+      cancel()
+      return
     }
+    if (trimmedTitle !== task.title || trimmedDesc !== (task.description || null) || priority !== task.priority) {
+      onUpdate(task.id, { title: trimmedTitle, description: trimmedDesc, priority })
+    }
+    setEditing(false)
+  }
+
+  function cancel() {
+    setTitle(task.title)
+    setDescription(task.description || '')
+    setPriority(task.priority)
     setEditing(false)
   }
 
@@ -30,28 +47,50 @@ export default function TaskItem({ task, onToggle, onUpdate, onRemove }) {
       />
       <div className="flex-1 min-w-0">
         {editing ? (
-          <input
-            autoFocus
-            className="w-full border rounded px-2 py-1"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            onBlur={save}
-            onKeyDown={(e) => { if (e.key === 'Enter') save(); if (e.key === 'Escape') { setTitle(task.title); setEditing(false) } }}
-          />
+          <div className="space-y-2">
+            <input
+              autoFocus
+              className="w-full border rounded px-2 py-1"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') save(); if (e.key === 'Escape') cancel() }}
+              placeholder="Titre"
+            />
+            <textarea
+              className="w-full border rounded px-2 py-1 text-sm"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Escape') cancel() }}
+              placeholder="Description (optionnel)"
+              rows={2}
+            />
+            <div className="flex items-center gap-2">
+              <select
+                className="border rounded px-2 py-1 text-sm"
+                value={priority}
+                onChange={(e) => setPriority(Number(e.target.value))}
+              >
+                <option value={0}>Basse</option>
+                <option value={1}>Moyenne</option>
+                <option value={2}>Haute</option>
+              </select>
+              <button onClick={save} className="text-sm bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">OK</button>
+              <button onClick={cancel} className="text-sm text-slate-500 hover:text-slate-700">Annuler</button>
+            </div>
+          </div>
         ) : (
-          <div
-            className={`font-medium cursor-text ${task.completed ? 'line-through text-slate-400' : ''}`}
-            onClick={() => setEditing(true)}
-          >
-            {task.title}
+          <div onClick={() => setEditing(true)} className="cursor-pointer">
+            <div className={`font-medium ${task.completed ? 'line-through text-slate-400' : ''}`}>
+              {task.title}
+            </div>
+            {task.description && (
+              <p className="text-sm text-slate-500 mt-1 whitespace-pre-line">{task.description}</p>
+            )}
+            <span className={`inline-block mt-2 text-xs px-2 py-0.5 rounded ${PRIORITY_COLOR[task.priority]}`}>
+              {PRIORITY_LABEL[task.priority]}
+            </span>
           </div>
         )}
-        {task.description && (
-          <p className="text-sm text-slate-500 mt-1 whitespace-pre-line">{task.description}</p>
-        )}
-        <span className={`inline-block mt-2 text-xs px-2 py-0.5 rounded ${PRIORITY_COLOR[task.priority]}`}>
-          {PRIORITY_LABEL[task.priority]}
-        </span>
       </div>
       <button
         onClick={() => onRemove(task.id)}

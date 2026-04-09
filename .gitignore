@@ -12,6 +12,17 @@ api/.env.local.php
 front/node_modules/
 front/dist/
 
+# Claude Code
+.claude/
+
+# Symfony recipes (fichiers générés, non utilisés)
+api/.editorconfig
+api/.env.dev
+api/.gitignore
+api/compose.override.yaml
+api/compose.yaml
+api/config/reference.php
+
 # IDE
 .idea/
 .vscode/
